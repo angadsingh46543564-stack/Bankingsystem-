@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS bank_db;
+USE bank_db;
+DROP TABLE IF EXISTS notifications, beneficiaries, transactions, accounts, customers, admins, users;
+CREATE TABLE users(id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(120) UNIQUE NOT NULL, password_hash VARCHAR(100) NOT NULL, role ENUM('customer','admin') DEFAULT 'customer', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE customers(id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, name VARCHAR(100) NOT NULL, dob DATE, gender VARCHAR(10), mobile VARCHAR(15), address VARCHAR(255), id_number VARCHAR(20), FOREIGN KEY(user_id) REFERENCES users(id));
+CREATE TABLE accounts(id INT AUTO_INCREMENT PRIMARY KEY, account_no VARCHAR(12) UNIQUE NOT NULL, customer_id INT NOT NULL, type ENUM('Savings','Current') NOT NULL, balance DECIMAL(14,2) DEFAULT 0, status ENUM('pending','active','inactive','rejected') DEFAULT 'pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(customer_id) REFERENCES customers(id));
+CREATE TABLE transactions(id INT AUTO_INCREMENT PRIMARY KEY, txn_id VARCHAR(20) NOT NULL, account_id INT NOT NULL, type ENUM('Deposit','Withdrawal','Transfer') NOT NULL, direction ENUM('Credit','Debit') NOT NULL, amount DECIMAL(14,2) NOT NULL, balance_after DECIMAL(14,2), counterparty VARCHAR(12), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(account_id), FOREIGN KEY(account_id) REFERENCES accounts(id));
+CREATE TABLE beneficiaries(id INT AUTO_INCREMENT PRIMARY KEY, account_id INT NOT NULL, benef_account_no VARCHAR(12) NOT NULL, nickname VARCHAR(100), UNIQUE(account_id, benef_account_no), FOREIGN KEY(account_id) REFERENCES accounts(id));
+CREATE TABLE admins(id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, name VARCHAR(100), FOREIGN KEY(user_id) REFERENCES users(id));
+CREATE TABLE notifications(id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, message VARCHAR(255) NOT NULL, is_read TINYINT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id));
